@@ -1,0 +1,98 @@
+@model Eticaret.Models.Kullanici;
+@{
+  Layout="_AuthLayout";
+}
+
+<body> 
+  <div class="container-xxl">
+    <div class="authentication-wrapper authentication-basic container-p-y">
+      <div class="authentication-inner py-4">
+        <!-- Kayıt Kartı -->
+        <div class="card">
+          <div class="card-body">
+            <!-- Logo -->
+            <div class="app-brand justify-content-center mb-4 mt-2">
+              <a href="index.html" class="app-brand-link gap-2">
+                <span class="app-brand-logo demo">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m9-9v9m4-9l2 9M5 21h14" />
+                  </svg>
+                </span>
+
+                <span class="app-brand-text demo text-body fw-bold ms-1">Eticaret</span>
+              </a>
+            </div>
+            <!-- /Logo -->
+
+            <h4 class="mb-1 pt-2">Kaydınızı oluşturun </h4>
+            <p class="mb-4">Hesabınızı oluşturarak alışverişe başlayın!</p>
+            @if (ViewBag.Hata != null)
+            {
+              <div class="alert alert-danger">
+                @ViewBag.Hata
+              </div>
+            }
+            <form id="formAuthentication" class="mb-3" asp-action="KayitOl" method="POST">
+              <div class="mb-3">
+                <label for="username" class="form-label">Ad Soyad</label>
+                <input asp-for="KullaniciAdi" type="text" class="form-control" id="username"
+                  placeholder="Ad ve Soyad girin" autofocus />
+              </div>
+              <div class="mb-3">
+                <label for="email" class="form-label">E-posta</label>
+                <input asp-for="Email" type="text" class="form-control" id="email"
+                  placeholder="E-posta adresinizi girin" />
+              </div>
+              <div class="mb-3 form-password-toggle">
+                <label class="form-label" for="password">Şifre</label>
+                <div class="input-group input-group-merge">
+                  <input asp-for="Sifre" type="password" id="password" class="form-control" placeholder="••••••••••••"
+                    aria-describedby="password" />
+                  <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" checked />
+                  <label class="form-check-label" for="terms-conditions">
+                    Gizlilik politikası ve kullanım şartlarını kabul ediyorum
+                  </label>
+                </div>
+              </div>
+
+              <button class="btn btn-primary d-grid w-100">Kayıt Ol</button>
+            </form>
+
+            <p class="text-center">
+              Hesabınız var mı? <a asp-action="OturumAc">Giriş Yap</a>
+            </p>
+
+            <div class="divider my-4">
+              <div class="divider-text">veya</div>
+            </div>
+
+            <div class="d-flex justify-content-center">
+              <a href="javascript:;" class="btn btn-icon btn-label-facebook me-3">
+                <i class="tf-icons fa-brands fa-facebook-f fs-5"></i>
+              </a>
+              <a href="javascript:;" class="btn btn-icon btn-label-google-plus me-3">
+                <i class="tf-icons fa-brands fa-google fs-5"></i>
+              </a>
+              <a href="javascript:;" class="btn btn-icon btn-label-twitter">
+                <i class="tf-icons fa-brands fa-twitter fs-5"></i>
+              </a>
+            </div>
+
+          </div>
+        </div>
+        <!-- /Kayıt Kartı -->
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>
