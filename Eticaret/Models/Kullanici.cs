@@ -5,6 +5,8 @@ namespace Eticaret.Models
 {
     public class Kullanici
     {
+        public virtual ICollection<Adres> Adresler { get; set; } = new List<Adres>();
+
         public int Id { get; set; }
         public string KullaniciAdi { get; set; } = null!;
         public string Email { get; set; } = null!;

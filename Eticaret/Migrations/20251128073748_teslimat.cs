@@ -5,24 +5,26 @@
 namespace Eticaret.Migrations
 {
     /// <inheritdoc />
-    public partial class AddKullanici : Migration
+    public partial class teslimat : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Kullanicilar",
+                name: "TeslimatSecenekleri",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    KullaniciAdi = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Sifre = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Ad = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Icon = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Ucret = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Aciklama = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Varsayilan = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Kullanicilar", x => x.Id);
+                    table.PrimaryKey("PK_TeslimatSecenekleri", x => x.Id);
                 });
         }
 
@@ -30,7 +32,7 @@ namespace Eticaret.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Kullanicilar");
+                name: "TeslimatSecenekleri");
         }
     }
 }
