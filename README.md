@@ -12,7 +12,7 @@ Bu proje, kullanıcı kayıt/giriş yönetimi, ürün listeleme, sepet işlemler
 
 ## 🚀 Kullanılan Teknolojiler
 
-* **ASP.NET Core MVC 7.0**
+* **ASP.NET Core MVC 8.0**
 * **C#**
 * **MSSQL Server**
 * **Entity Framework Core**
@@ -29,9 +29,11 @@ Bu proje, kullanıcı kayıt/giriş yönetimi, ürün listeleme, sepet işlemler
 ### 👤 Kullanıcı İşlemleri
 
 * Üyelik oluşturma
+*  10 dakika geçmiş doğrulama kodlarını otomatik olarak temizler
 * E‑posta ile iki adımlı doğrulama
 * Güvenli kullanıcı girişi
 * Şifre sıfırlama / yenileme işlemleri
+
 
 ### 🛍️ Ürün & Mağaza
 
