@@ -165,4 +165,3 @@ Aşağıdaki HTML yapı, kullanıcıya gönderilen doğrulama kodu e‑postasın
 
 Bu proje, modern bir e-ticaret platformu oluşturmak isteyenler için güçlü bir başlangıç noktası sunar. Hem frontend hem backend mimarisi profesyonel şekilde yapılandırılmıştır.
 
-Daha fazla geliştirme için öneriler istersen memnuniyetle yardımcı olabilirim! 🚀
