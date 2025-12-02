@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Eticaret")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5b8c41462a60509679d11db37d5e6a89c59c3307")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+39c328b048dd49b997d49c3f48ad4fa071574525")]
 [assembly: System.Reflection.AssemblyProductAttribute("Eticaret")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Eticaret")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
