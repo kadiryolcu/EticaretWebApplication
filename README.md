@@ -40,6 +40,6 @@ Proje, MSSQL Server üzerinde çalışmaktadır. Önerilen yapı:
 
 > ### Sepet sayfası
 > 
-<img width="1920" height="1072" alt="image" src="https://github.com/user-attachments/assets/6d6ca4cf-1382-43ff-a4f5-388ee894165c" />
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/6d6ca4cf-1382-43ff-a4f5-388ee894165c" />
 
 
