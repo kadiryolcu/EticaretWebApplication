@@ -30,6 +30,10 @@ Proje, MSSQL Server üzerinde çalışmaktadır. Önerilen yapı:
 
 <img width="800" alt="Kullanıcı Giriş Sayfası" src="https://github.com/user-attachments/assets/3a8ee0ea-0cfe-4577-be35-e753c365db47" />
 
+> ### İki Adımlı Doğrulama
+
+<img width="800"  alt="image" src="https://github.com/user-attachments/assets/92086f38-5637-43d0-ac78-5e4834d6f5b6" />
+
 
 
 
