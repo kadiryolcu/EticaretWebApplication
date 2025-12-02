@@ -1,25 +1,23 @@
 using System.Diagnostics;
 using Eticaret.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Newtonsoft.Json;
+using Eticaret.Services;
 
 namespace Eticaret.Controllers;
 
 public class HomeController : Controller
 {
-
     private readonly ILogger<HomeController> _logger;
     private readonly AppDbContext _context; // DbContext
+    private readonly MailService _mailService; // DI ile MailService
 
-    public HomeController(ILogger<HomeController> logger, AppDbContext context)
+    public HomeController(ILogger<HomeController> logger, AppDbContext context, MailService mailService)
     {
         _logger = logger;
-        _context = context; // DI ile gelen context
+        _context = context;
+        _mailService = mailService;
     }
-
 
     [HttpGet]
     public async Task<IActionResult> Index(int? addProductId, int quantity = 1)
@@ -32,11 +30,11 @@ public class HomeController : Controller
         // Sepete ekleme
         if (addProductId.HasValue && !string.IsNullOrEmpty(userId))
         {
-            var product = _context.Urunler.Find(addProductId.Value);
+            var product = await _context.Urunler.FindAsync(addProductId.Value);
             if (product != null)
             {
-                var cartItem = _context.Sepettekiler
-                    .FirstOrDefault(c => c.ProductId == addProductId.Value && c.UserId == userId);
+                var cartItem = await _context.Sepettekiler
+                    .FirstOrDefaultAsync(c => c.ProductId == addProductId.Value && c.UserId == userId);
 
                 if (cartItem != null)
                     cartItem.Quantity += quantity;
@@ -48,43 +46,39 @@ public class HomeController : Controller
                         Quantity = quantity
                     });
 
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
 
-        var products = _context.Urunler.ToList();
+        var products = await _context.Urunler.ToListAsync();
 
         int sepetSayisi = 0;
         var sepetList = new List<Sepet>();
         if (!string.IsNullOrEmpty(userId))
         {
-            sepetList = _context.Sepettekiler
+            sepetList = await _context.Sepettekiler
                 .Include(s => s.Urunler)
                 .Where(s => s.UserId == userId)
-                .ToList();
+                .ToListAsync();
 
             sepetSayisi = sepetList.Sum(s => s.Quantity);
         }
 
-        var Teslimat = _context.TeslimatSecenekleri.ToList();
-
+        var teslimatSecenekleri = await _context.TeslimatSecenekleri.ToListAsync();
 
         var model = new HomeViewModel
         {
             Urunler = products,
             SepetList = sepetList,
             SepetSayisi = sepetSayisi,
-            TeslimatSecenekleri = Teslimat
+            TeslimatSecenekleri = teslimatSecenekleri
         };
 
         return View(model);
     }
 
-    [HttpGet]
-    public IActionResult OturumAc()
-    {
-        return View();
-    }
+
+
     [HttpGet]
     public async Task<IActionResult> Sepettekiler(int? addProductId, int quantity = 1)
     {
@@ -93,14 +87,14 @@ public class HomeController : Controller
 
         var userId = HttpContext.Session.GetString("KullaniciId");
 
-        // Sepete ekleme
+        // Sepete ürün ekleme
         if (addProductId.HasValue && !string.IsNullOrEmpty(userId))
         {
-            var product = _context.Urunler.Find(addProductId.Value);
+            var product = await _context.Urunler.FindAsync(addProductId.Value);
             if (product != null)
             {
-                var cartItem = _context.Sepettekiler
-                    .FirstOrDefault(c => c.ProductId == addProductId.Value && c.UserId == userId);
+                var cartItem = await _context.Sepettekiler
+                    .FirstOrDefaultAsync(c => c.ProductId == addProductId.Value && c.UserId == userId);
 
                 if (cartItem != null)
                     cartItem.Quantity += quantity;
@@ -112,40 +106,83 @@ public class HomeController : Controller
                         Quantity = quantity
                     });
 
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
 
-        var products = _context.Urunler.ToList();
+        // Kullanıcının sepeti
+        var sepetList = await _context.Sepettekiler
+            .Include(s => s.Urunler)
+            .Where(s => s.UserId == userId)
+            .ToListAsync();
 
-        int sepetSayisi = 0;
-        var sepetList = new List<Sepet>();
-        if (!string.IsNullOrEmpty(userId))
+        int sepetSayisi = sepetList.Sum(s => s.Quantity);
+
+        var kullaniciList = await _context.Kullanicilar.ToListAsync();
+        var adreslerList = await _context.Adresler.Include(a => a.Kullanici).ToListAsync();
+        var teslimatList = await _context.TeslimatSecenekleri.ToListAsync();
+
+        // Mevcut sipariş
+        var mevcutSiparis = await _context.Siparisler
+            .FirstOrDefaultAsync(s => s.KullaniciId.ToString() == userId && s.Durum == "Hazırlanıyor");
+
+        if (mevcutSiparis == null)
         {
-            sepetList = _context.Sepettekiler
-                .Include(s => s.Urunler)
-                .Where(s => s.UserId == userId)
-                .ToList();
+            var secilenAdres = await _context.Adresler
+                .FirstOrDefaultAsync(a => a.KullaniciId.ToString() == userId);
 
-            sepetSayisi = sepetList.Sum(s => s.Quantity);
+            if (secilenAdres == null)
+            {
+                var dummyAdres = new Adres
+                {
+                    KullaniciId = int.Parse(userId),
+                    AdresTuru = "Ev",
+                    Ad = "Test",
+                    Soyad = "Kullanıcı",
+                    Ulke = "Türkiye",
+                    Il = "İstanbul",
+                    Ilce = "Kadıköy",
+                    Mahalle = "Moda",
+                    AdresDetay = "Sokak, No:0",
+                    PostaKodu = "00000"
+                };
+                _context.Adresler.Add(dummyAdres);
+                await _context.SaveChangesAsync();
+                secilenAdres = dummyAdres;
+            }
+
+            mevcutSiparis = new Siparis
+            {
+                KullaniciId = int.Parse(userId),
+                AdresId = secilenAdres.Id,
+                SiparisTarihi = DateTime.Now,
+                Durum = "Hazırlanıyor",
+                TeslimatSecenegiId = 1,
+                ToplamTutar = sepetList.Sum(x => x.TotalPrice)
+            };
+
+            _context.Siparisler.Add(mevcutSiparis);
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            mevcutSiparis.ToplamTutar = sepetList.Sum(x => x.TotalPrice);
+            await _context.SaveChangesAsync();
         }
 
-        var kullanici = _context.Kullanicilar.ToList();
-        // Kullanıcıların tüm adreslerini listele, her adresle birlikte KullaniciId'yi al
-        var adresler = _context.Adresler
-     .Include(a => a.Kullanici)  // ✅ Navigation property
-     .ToList();
-
-        var Teslimat = _context.TeslimatSecenekleri.ToList();
+        var siparisler = await _context.Siparisler
+            .Where(s => s.KullaniciId.ToString() == userId)
+            .ToListAsync();
 
         var model = new HomeViewModel
         {
-            Urunler = products,
+            Urunler = await _context.Urunler.ToListAsync(),
             SepetList = sepetList,
             SepetSayisi = sepetSayisi,
-            KullaniciList = kullanici,
-            AdreslerList = adresler,
-            TeslimatSecenekleri = Teslimat
+            KullaniciList = kullaniciList,
+            AdreslerList = adreslerList,
+            TeslimatSecenekleri = teslimatList,
+            SiparisList = siparisler
         };
 
         return View(model);
@@ -154,10 +191,6 @@ public class HomeController : Controller
     [HttpPost]
     public async Task<IActionResult> AdresEkle(HomeViewModel model)
     {
-
-
-
-        // Kullanıcı Id session'dan alınır
         var kullaniciIdStr = HttpContext.Session.GetString("KullaniciId");
 
         if (string.IsNullOrEmpty(kullaniciIdStr) || !int.TryParse(kullaniciIdStr, out int kullaniciId))
@@ -169,26 +202,22 @@ public class HomeController : Controller
         try
         {
             model.Adres.KullaniciId = kullaniciId;
-
             _context.Adresler.Add(model.Adres);
             await _context.SaveChangesAsync();
-
             TempData["SuccessMessage"] = "Adres başarıyla eklendi!";
             return RedirectToAction("Sepettekiler");
         }
-        catch (Exception ex)
+        catch
         {
             ModelState.AddModelError("", "Adres eklenirken bir hata oluştu.");
-            Console.WriteLine(ex.Message);
             return View("Sepettekiler");
         }
     }
+
     [HttpGet]
     public async Task<IActionResult> AdresSil(int id)
     {
-
         var adres = await _context.Adresler.FindAsync(id);
-
         if (adres == null)
         {
             TempData["ErrorMessage"] = "Adres bulunamadı.";
@@ -197,7 +226,6 @@ public class HomeController : Controller
 
         _context.Adresler.Remove(adres);
         await _context.SaveChangesAsync();
-
         TempData["SuccessMessage"] = "Adres silindi.";
         return RedirectToAction("Index");
     }
@@ -205,40 +233,30 @@ public class HomeController : Controller
     [HttpGet]
     public async Task<IActionResult> SecilenTeslimat(int id)
     {
-
         var kullaniciIdStr = HttpContext.Session.GetString("KullaniciId");
 
-        // Güvenli int dönüşümü
         if (!int.TryParse(kullaniciIdStr, out int kullaniciId))
-        {
-            // Hatalı veya login olmamışsa yönlendir
-            return RedirectToAction("OturumAc", "Home");
-        }
+            return RedirectToAction("OturumAc");
 
+        var sepetList = await _context.Sepettekiler
+            .Where(s => s.UserId == kullaniciIdStr)
+            .Include(s => s.Urunler)
+            .ToListAsync();
 
-        var sepetList = _context.Sepettekiler
-                          .Where(s => s.UserId == kullaniciIdStr)
-                          .Include(s => s.Urunler)
-                          .ToList();
+        var adresList = await _context.Adresler
+            .Where(a => a.KullaniciId == kullaniciId)
+            .ToListAsync();
 
-        var adresList = _context.Adresler
-                           .Where(a => a.KullaniciId == kullaniciId)
-                           .ToList();
-
-        // İlk adresi al
         var firstAdres = adresList.FirstOrDefault();
+        if (!sepetList.Any() || firstAdres == null)
+            return RedirectToAction("Sepettekiler");
 
-        if (!sepetList.Any())
-            return RedirectToAction("Sepettekiler"); // Sepet boşsa geri dön
-
-        // 3. Toplam tutarı hesapla
         decimal toplamTutar = sepetList.Sum(x => x.TotalPrice);
 
-        // 4. Sipariş oluştur
         var siparis = new Siparis
         {
             KullaniciId = kullaniciId,
-            AdresId = firstAdres.Id, // Örnek: ilk adresi kullan
+            AdresId = firstAdres.Id,
             TeslimatSecenegiId = id,
             ToplamTutar = toplamTutar,
             SiparisTarihi = DateTime.Now,
@@ -250,37 +268,43 @@ public class HomeController : Controller
 
         HttpContext.Session.SetInt32("SecilenTeslimatId", id);
 
-    
-
-        return RedirectToAction("Sepettekiler"); // Örn: Siparişler sayfasına yönlendir
+        return RedirectToAction("Sepettekiler");
     }
-
-
 
     public IActionResult SepetGuncelle(int id, int arttir = 0, int azalt = 0, int sil = 0)
     {
         var sepetItem = _context.Sepettekiler.FirstOrDefault(s => s.Urunler.Id == id);
         if (sepetItem != null)
         {
-            if (sil == 1)
-            {
-                _context.Sepettekiler.Remove(sepetItem);
-            }
-            else if (arttir == 1)
-            {
-                sepetItem.Quantity += 1;
-            }
-            else if (arttir == 0 && sepetItem.Quantity > 1)
-            {
-                sepetItem.Quantity -= 1;
-            }
+            if (sil == 1) _context.Sepettekiler.Remove(sepetItem);
+            else if (arttir == 1) sepetItem.Quantity += 1;
+            else if (arttir == 0 && sepetItem.Quantity > 1) sepetItem.Quantity -= 1;
+
             _context.SaveChanges();
+        }
+
+        var userId = HttpContext.Session.GetString("KullaniciId");
+        if (!string.IsNullOrEmpty(userId))
+        {
+            var mevcutSiparis = _context.Siparisler
+                .FirstOrDefault(s => s.KullaniciId.ToString() == userId && s.Durum == "Hazırlanıyor");
+
+            if (mevcutSiparis != null)
+            {
+                var sepetList = _context.Sepettekiler
+                    .Include(s => s.Urunler)
+                    .Where(s => s.UserId == userId)
+                    .ToList();
+
+                mevcutSiparis.ToplamTutar = sepetList.Sum(x => x.TotalPrice);
+                _context.SaveChanges();
+            }
         }
 
         return RedirectToAction("Sepettekiler");
     }
-
-
+    [HttpGet]
+    public IActionResult OturumAc() => View();
     [HttpPost]
     public async Task<IActionResult> OturumAc(Kullanici model)
     {
@@ -290,7 +314,6 @@ public class HomeController : Controller
             return View();
         }
 
-        // Kullanıcıyı veritabanından sorgula
         var kullanici = await _context.Kullanicilar
             .FirstOrDefaultAsync(k => k.Email == model.Email);
 
@@ -300,39 +323,93 @@ public class HomeController : Controller
             return View();
         }
 
-        // Session oluştur
-        HttpContext.Session.SetString("KullaniciId", kullanici.Id.ToString());
-        HttpContext.Session.SetString("KullaniciAdi", kullanici.Email);
+        // Kullanıcı girişi doğruysa, e-posta doğrulama kodu oluştur
+        var dogrulamaKodu = new Random().Next(100000, 999999);
+        kullanici.EmailDogrulamaKodu = dogrulamaKodu.ToString();
+        await _context.SaveChangesAsync();
 
-        // Ana sayfaya yönlendir
-        return RedirectToAction("Index", "Home");
+        string subject = "Giriş Doğrulama Doğrulama Kodunuz";
+        string message = $"<h3>Doğrulama Kodunuz:</h3><h2>{dogrulamaKodu}</h2>";
+
+        await _mailService.SendEmailAsync(model.Email, subject, message);
+
+
+        // TempData ile e-posta gönderimi için view'a aktar
+        HttpContext.Session.SetString("Email", model.Email);
+
+        // Kullanıcıyı doğrulama sayfasına yönlendir
+        return View("GirisDogrula");
     }
 
-
-
-
-    public IActionResult Cikis()
+    public IActionResult GirisDogrula()
     {
-        HttpContext.Session.Clear(); // Session temizle
-        return RedirectToAction("OturumAc");
-    }
-    [HttpGet]
-    public IActionResult KayitOl()
-    {
+        // Kullanıcı e-posta doğrulama kodunu girecek sayfa
         return View();
     }
 
     [HttpPost]
+    public async Task<IActionResult> GirisDogrula(string EmailDogrulamaKodu)
+    {
+        var email = HttpContext.Session.GetString("Email");
+        if (email == null)
+        {
+            return RedirectToAction("OturumAc");
+        }
+
+         email = email as string;
+        if (string.IsNullOrEmpty(EmailDogrulamaKodu))
+        {
+            ViewBag.Hata = "Lütfen doğrulama kodunu girin.";
+            return View();
+        }
+
+        var kullanici = await _context.Kullanicilar
+            .FirstOrDefaultAsync(k => k.Email == email);
+
+        if (kullanici == null)
+        {
+            return RedirectToAction("OturumAc");
+        }
+
+        if (kullanici.EmailDogrulamaKodu == EmailDogrulamaKodu)
+        {
+            kullanici.EmailOnayli = true;
+            await _context.SaveChangesAsync();
+
+            // Giriş başarılı, session ayarla
+            HttpContext.Session.SetString("KullaniciId", kullanici.Id.ToString());
+            HttpContext.Session.SetString("KullaniciAdi", kullanici.Email);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        ViewBag.Hata = "Doğrulama kodu hatalı.";
+        return View();
+    }
+
+
+    public IActionResult CikisYap()
+    {
+        HttpContext.Session.Clear();
+        return RedirectToAction("OturumAc");
+    }
+
+    [HttpGet]
+    public IActionResult KayitOl() => View();
+
+
+
+    [HttpPost]
     public async Task<IActionResult> KayitOl(Kullanici model)
     {
-        // Alanların boş olup olmadığını kontrol et
-        if (string.IsNullOrEmpty(model.KullaniciAdi) || string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Sifre))
+        if (string.IsNullOrEmpty(model.KullaniciAdi) ||
+            string.IsNullOrEmpty(model.Email) ||
+            string.IsNullOrEmpty(model.Sifre))
         {
             ViewBag.Hata = "Lütfen tüm alanları doldurun.";
             return View();
         }
 
-        // Kullanıcı zaten kayıtlı mı kontrol et
         var mevcutKullanici = await _context.Kullanicilar
             .FirstOrDefaultAsync(k => k.Email == model.Email);
 
@@ -342,18 +419,59 @@ public class HomeController : Controller
             return View();
         }
 
-        // Kullanıcıyı veritabanına ekle
+        string dogrulamaKodu = new Random().Next(100000, 999999).ToString();
+        model.EmailOnayli = false;
+        model.EmailDogrulamaKodu = dogrulamaKodu;
+
         _context.Kullanicilar.Add(model);
         await _context.SaveChangesAsync();
 
-        ViewBag.Basarili = "Kayıt başarılı! Giriş yapabilirsiniz.";
+        string subject = "E-posta Doğrulama Kodunuz";
+        string message = $"<h3>Doğrulama Kodunuz:</h3><h2>{dogrulamaKodu}</h2>";
 
-        return RedirectToAction("OturumAc");
+        await _mailService.SendEmailAsync(model.Email, subject, message);
+
+        TempData["YeniKayitId"] = model.Id;
+        TempData["Email"] = model.Email;
+
+
+
+        return RedirectToAction("MailDogrula");
+    }
+
+
+
+    [HttpGet]
+    public IActionResult MailDogrula()
+    {
+
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> MailDogrula(int EmailDogrulamaKodu)
+    {
+        if (!TempData.TryGetValue("YeniKayitId", out var idObj))
+            return RedirectToAction("KayitOl");
+
+        int kullaniciId = (int)idObj;
+        var kullanici = await _context.Kullanicilar.FindAsync(kullaniciId);
+        if (kullanici == null) return RedirectToAction("KayitOl");
+
+        if (kullanici.EmailDogrulamaKodu == EmailDogrulamaKodu.ToString())
+        {
+            kullanici.EmailOnayli = true;
+            await _context.SaveChangesAsync();
+            return RedirectToAction("OturumAc");
+        }
+
+
+        ViewBag.Hata = "Doğrulama kodu hatalı.";
+        return View();
     }
 
     public IActionResult Anasayfa()
     {
-        // Eğer session yoksa giriş sayfasına yönlendir
         if (HttpContext.Session.GetString("KullaniciAdi") == null)
             return RedirectToAction("OturumAc");
 
@@ -361,16 +479,11 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+    public IActionResult Privacy() => View();
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
-        return View(
-            new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }
-        );
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

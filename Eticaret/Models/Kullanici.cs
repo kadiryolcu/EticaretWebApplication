@@ -11,6 +11,9 @@ namespace Eticaret.Models
         public string KullaniciAdi { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string Sifre { get; set; } = null!;
+        public bool EmailOnayli { get; set; } = false;
+        public string? EmailDogrulamaKodu { get; set; }
+
 
     }
 }

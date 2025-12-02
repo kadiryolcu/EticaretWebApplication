@@ -20,12 +20,20 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 8.0
 build_property.EnableCodeStyleSeverity = 
 
+[C:/Users/KEYLO/Desktop/Eticaret/Eticaret/Views/Home/GirisDogrula.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxHaXJpc0RvZ3J1bGEuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/KEYLO/Desktop/Eticaret/Eticaret/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/KEYLO/Desktop/Eticaret/Eticaret/Views/Home/KayitOl.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxLYXlpdE9sLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/KEYLO/Desktop/Eticaret/Eticaret/Views/Home/MailDogrula.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxNYWlsRG9ncnVsYS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/KEYLO/Desktop/Eticaret/Eticaret/Views/Home/OturumAc.cshtml]

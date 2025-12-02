@@ -90,6 +90,12 @@ namespace Eticaret.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("EmailDogrulamaKodu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("EmailOnayli")
+                        .HasColumnType("bit");
+
                     b.Property<string>("KullaniciAdi")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -136,7 +142,8 @@ namespace Eticaret.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AdresId")
+                    b.Property<int?>("AdresId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("Durum")

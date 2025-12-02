@@ -1,0 +1,114 @@
+@model Eticaret.Models.Kullanici;
+@{
+  Layout = "_AuthLayout";
+}
+
+<body>
+  <div class="authentication-wrapper authentication-basic px-4">
+    <div class="authentication-inner py-4">
+      <!--  Two Steps Verification -->
+      <div class="card">
+        <div class="card-body">
+          <!-- Logo -->
+          <div class="app-brand justify-content-center mb-4 mt-2">
+            <a href="index.html" class="app-brand-link gap-2">
+              <span class="app-brand-logo demo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m9-9v9m4-9l2 9M5 21h14" />
+                </svg>
+              </span>
+              <span class="app-brand-text demo text-body fw-bold ms-1">Eticaret</span>
+            </a>
+          </div>
+          <!-- /Logo -->
+          <h4 class="mb-1 pt-2">İki Adımlı Doğrulama 💬</h4>
+          <p class="text-start mb-4">
+            @{
+              var email = TempData["Email"] as string;
+
+              // Null veya boşsa fallback
+              if (string.IsNullOrEmpty(email))
+              {
+                email = "*****@example.com";
+              }
+
+              // İlk 5 haneyi ***** yap
+              string gizliEmail = email.Length > 5 ? "*****" + email.Substring(5) : email;
+            }
+
+            Mail adresinize bir doğrulama kodu gönderdik. Aşağıdaki alana mail adresinizdeki kodu girin.
+
+            <span class="fw-bold d-block mt-2">******@email </span>
+          </p>
+          @if (ViewBag.Hata != null)
+          {
+            <div class="alert alert-danger">
+              @ViewBag.Hata
+            </div>
+          }
+          <p class="mb-0 fw-semibold">6 Haneli Güvenlik Kodunu Girin</p>
+          <form id="twoStepsForm" asp-action="GirisDogrula" method="POST">
+            <div class="mb-3">
+              <div class="auth-input-wrapper d-flex align-items-center justify-content-sm-between numeral-mask-wrapper">
+                <input type="text"
+                  class="form-control auth-input h-px-50 text-center numeral-mask text-center h-px-50 mx-1 my-2"
+                  maxlength="1" autofocus />
+                <input type="text"
+                  class="form-control auth-input h-px-50 text-center numeral-mask text-center h-px-50 mx-1 my-2"
+                  maxlength="1" />
+                <input type="text"
+                  class="form-control auth-input h-px-50 text-center numeral-mask text-center h-px-50 mx-1 my-2"
+                  maxlength="1" />
+                <input type="text"
+                  class="form-control auth-input h-px-50 text-center numeral-mask text-center h-px-50 mx-1 my-2"
+                  maxlength="1" />
+                <input type="text"
+                  class="form-control auth-input h-px-50 text-center numeral-mask text-center h-px-50 mx-1 my-2"
+                  maxlength="1" />
+                <input type="text"
+                  class="form-control auth-input h-px-50 text-center numeral-mask text-center h-px-50 mx-1 my-2"
+                  maxlength="1" />
+              </div>
+              <!-- Create a hidden field which is combined by 3 fields above -->
+              <input type="hidden" name="EmailDogrulamaKodu" asp-for="EmailDogrulamaKodu" />
+            </div>
+            <button class="btn btn-primary d-grid w-100 mb-3">Onayla</button>
+            <div class="text-center">
+              Kod gelmedi mi?
+              <a href="javascript:void(0);"> Tekrar gönder </a>
+            </div>
+          </form>
+
+        </div>
+      </div>
+      <!-- / Two Steps Verification -->
+    </div>
+  </div>
+
+  <script>
+    const inputs = document.querySelectorAll('.numeral-mask');
+    const hiddenInput = document.querySelector('input[name="EmailDogrulamaKodu"]');
+
+    inputs.forEach((input, index) => {
+      input.addEventListener('input', () => {
+        // otomatik olarak bir sonraki input'a geçiş
+        if (input.value.length === 1 && index < inputs.length - 1) {
+          inputs[index + 1].focus();
+        }
+        // tüm inputları birleştir ve hidden input'a ata
+        hiddenInput.value = Array.from(inputs).map(i => i.value).join('');
+      });
+
+      input.addEventListener('keydown', (e) => {
+        // backspace ile önceki input'a geçiş
+        if (e.key === 'Backspace' && input.value === '' && index > 0) {
+          inputs[index - 1].focus();
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

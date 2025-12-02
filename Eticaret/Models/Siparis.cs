@@ -18,7 +18,7 @@ namespace Eticaret.Models
 
         // Siparişin teslim edileceği adres
         [Required]
-        public int AdresId { get; set; }
+        public int? AdresId { get; set; }
 
         [ForeignKey("AdresId")]
         public virtual Adres Adres { get; set; } = null!;

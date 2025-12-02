@@ -1,6 +1,13 @@
 using Microsoft.EntityFrameworkCore;
+using Eticaret.Models;
+using Eticaret.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<SmtpSettings>(
+    builder.Configuration.GetSection("SmtpSettings"));
+builder.Services.AddTransient<MailService>();
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -16,6 +23,8 @@ builder.Services.AddDistributedSqlServerCache(options =>
     options.SchemaName = "dbo";
     options.TableName = "Sessions";
 });
+
+
 
 // Session ayarları
 builder.Services.AddSession(options =>

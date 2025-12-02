@@ -1,9 +1,10 @@
-@model Eticaret.Models.HomeViewModel;
-
 @{
   Layout = "_Layout";
 
 }
+@using Eticaret.Migrations
+@model Eticaret.Models.HomeViewModel;
+
 
 
 <div id="wizard-checkout" class="bs-stepper wizard-icons wizard-icons-example mt-2">
@@ -204,17 +205,6 @@
                 <dd class="col-6 text-end">₺@sepetToplam.ToString("N2")</dd>
 
 
-                <dt class="col-6 fw-normal">Kargo Ücreti</dt>
-                <dd class="col-6 text-end">
-                  @if (sepetToplam > 5000)
-                  {
-                    <span class="badge bg-label-success ms-1">Ücretsiz (5.000 TL Üzeri)</span>
-                  }
-                  else
-                  {
-                    <span>₺ 250</span>
-                  }
-                </dd>
               </dl>
 
               <hr class="mx-n4">
@@ -229,7 +219,9 @@
 
 
             <div class="d-grid">
-              <button class="btn btn-primary btn-next waves-effect waves-light">Siparişi Tamamla</button>
+              <button type="button" id="goToAddress" class="btn btn-primary btn-next waves-effect waves-light">
+                Adres Seçin
+              </button>
             </div>
 
           </div>
@@ -245,7 +237,13 @@
             <p>Tercih ettiğiniz adresi seçin</p>
             <div class="row mb-3">
 
-
+              @if (TempData["SuccessMessage"] != null)
+              {
+                <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                  <strong>Başarılı!</strong> @TempData["SuccessMessage"]
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              }
               <div class="row">
                 @foreach (var adres in Model.AdreslerList)
                 {
@@ -265,13 +263,7 @@
 
                           </small>
                           <hr class="my-2">
-                          @if (TempData["SuccessMessage"] != null)
-                          {
-                            <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-                              <strong>Başarılı!</strong> @TempData["SuccessMessage"]
-                              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                          }
+
                           <a asp-action="AdresSil" asp-route-id="@adres.Id"> <i class="ti ti-trash"> </i></a>
 
                         </span>
@@ -295,9 +287,9 @@
             <!-- Choose Delivery -->
             <p>Kargo Tipini Seçin</p>
             <div class="row">
-            
 
-               @{
+
+              @{
                 var secilenId = Context.Session.GetInt32("SecilenTeslimatId") ?? 0;
               }
 
@@ -306,7 +298,7 @@
               {
                 <div class="col-md mb-md-0 mb-2">
                   <div
-                   class="custom-option custom-option-icon position-relative @(secilenId == teslimat.Id ? "checked" : "")">
+                    class="custom-option custom-option-icon position-relative @(secilenId == teslimat.Id ? "checked" : "")">
                     <label class="form-check-label custom-option-content" for="customRadioDelivery_@teslimat.Id">
                       <span class="custom-option-body">
                         <i class="@teslimat.Icon"></i>
@@ -335,16 +327,34 @@
             <br />
             <div class="border rounded p-4 mb-3 pb-3">
               <!-- Fiyat Detayları -->
-              <h6>Fiyat Detayları</h6>
+              <h6>Kargo Detayları</h6>
 
               <dl class="row mb-0">
                 <dt class="col-6 fw-normal">Sepet Toplamı</dt>
                 <dd class="col-6 text-end">₺@sepetToplam.ToString("N2")</dd>
 
 
-                <dt class="col-6 fw-normal">Kargo Ücreti</dt>
+                <dt class="col-6 fw-normal"> Kargo Fiyatı </dt>
                 <dd class="col-6 text-end">
-                  Ücretsiz
+                  @{
+                    decimal kargoUcreti;
+                  }
+                  @if (secilenId == 1)
+                  {
+                    @:Ücretsiz
+                    kargoUcreti = 0;
+                  }
+                  else if (secilenId == 2)
+                  {
+                    @:150,00 TL
+                    kargoUcreti = 150;
+                  }
+                  else
+                  {
+                    @:500,00 TL
+                    kargoUcreti = 500;
+                  }
+
                 </dd>
               </dl>
 
@@ -352,7 +362,12 @@
               <dl class="row mb-0">
                 <dt class="col-6">Genel Toplam</dt>
                 <dd class="col-6 fw-semibold text-end mb-0">₺
-                  @(sepetToplam > 5000 ? sepetToplam.ToString("N2") : (sepetToplam + 250).ToString("N2"))
+                  @{
+                    decimal toplam = sepetToplam == 0 ? 0 : sepetToplam;
+                    toplam += kargoUcreti;
+                  }
+                  @toplam.ToString("N2")
+
                 </dd>
 
               </dl>
@@ -360,7 +375,9 @@
 
 
             <div class="d-grid">
-              <button class="btn btn-primary btn-next waves-effect waves-light">Siparişi Tamamla</button>
+              <button type="button" id="goToPayment" class="btn btn-primary btn-next waves-effect waves-light">
+                Ödemeye Geç
+              </button>
             </div>
           </div>
         </div>
@@ -459,34 +476,54 @@
           <div class="col-xl-3">
             <div class="border rounded p-4">
               <!-- Price Details -->
-              <h6>Price Details</h6>
+              <h6>Ödeme Detayları</h6>
               <dl class="row">
-                <dt class="col-6 fw-normal">Order Total</dt>
-                <dd class="col-6 text-end">$1100.00</dd>
+                <dt class="col-6 fw-normal">Toplam Ödeme</dt>
+                <dd class="col-6 text-end"> @sepetToplam.ToString("N2") TL</dd>
 
-                <dt class="col-6 fw-normal">Delivery Charges</dt>
+                <dt class="col-6 fw-normal">Kargo Ücreti</dt>
                 <dd class="col-6 text-end">
-                  <s>$5.00</s> <span class="badge bg-label-success ms-1">Free</span>
+                  @kargoUcreti TL
                 </dd>
               </dl>
               <hr class="mx-n4">
-              <dl class="row">
-                <dt class="col-6 mb-3">Total</dt>
-                <dd class="col-6 fw-semibold text-end mb-0">$1100.00</dd>
+              @{
+                // Sipariş listesi boş olabilir, güvenli bir şekilde ilk siparişi alıyoruz
+                var ilkSiparis = Model.SiparisList?.FirstOrDefault();
+              }
 
-                <dt class="col-6 fw-normal">Deliver to:</dt>
+              <dl class="row">
+                <dt class="col-6 fw-normal">Gönderim:</dt>
                 <dd class="col-6 fw-semibold text-end mb-0">
-                  <span class="badge bg-label-primary">Home</span>
+                  @if (ilkSiparis?.Adres != null)
+                  {
+                    <span class="badge bg-label-primary">@ilkSiparis.Adres.AdresTuru</span>
+                  }
+                  else
+                  {
+                    <span class="badge bg-label-secondary">Adres Yok</span>
+                  }
                 </dd>
               </dl>
+
               <!-- Address Details -->
-              <address class="text-heading">
-                <span> John Doe (Default),</span><br>
-                4135 Parkway Street, <br>
-                Los Angeles, CA, 90017. <br>
-                Mobile : +1 906 568 2332
-              </address>
-              <a href="javascript:void(0)">Change address</a>
+              @if (ilkSiparis?.Adres != null)
+              {
+                <address class="text-heading">
+                  <span>@ilkSiparis.Adres.Ad @ilkSiparis.Adres.Soyad,</span><br>
+                  @ilkSiparis.Adres.Mahalle <br>
+                  @ilkSiparis.Adres.AdresDetay, @ilkSiparis.Adres.PostaKodu. <br>
+                  @ilkSiparis.Adres.Ulke @ilkSiparis.Adres.Il
+                  @ilkSiparis.Adres.Ilce
+                </address>
+              }
+              else
+              {
+                <address class="text-heading">
+                  <span>Adres bilgisi mevcut değil.</span>
+                </address>
+              }
+
             </div>
           </div>
         </div>
@@ -496,46 +533,45 @@
       <div id="checkout-confirmation" class="content fv-plugins-bootstrap5 fv-plugins-framework">
         <div class="row mb-3">
           <div class="col-12 col-lg-8 offset-lg-2 text-center mb-3">
-            <h4 class="mt-2">Thank You! 😇</h4>
-            <p>Your order <a href="javascript:void(0)">#1536548131</a> has been placed!</p>
+            <h4 class="mt-2">Teşekkürler! @Model.SiparisList.First().Adres.Ad @Model.SiparisList.First().Adres.Soyad
+            </h4>
+            <p> <a href="javascript:void(0)">#@Model.SiparisList.First().Id</a> numaralı siparişiniz verildi!</p>
             <p>
-              We sent an email to <a href="mailto:john.doe@example.com">john.doe@example.com</a> with your
-              order confirmation and receipt. If the email hasn't arrived within two minutes, please check
-              your spam folder to see if the email was routed there.
+              Sipariş onayınız ve fişinizle birlikte <a
+                href="@Model.KullaniciList.First().Email">@Model.KullaniciList.First().Email</a> with your
+              adresine bir e-posta gönderdik. E-posta iki dakika içinde ulaşmadıysa, lütfen spam klasörünüzü kontrol
+              ederek e-postanın oraya yönlendirilip yönlendirilmediğini kontrol edin.
             </p>
             <p>
-              <span class="fw-semibold"><i class="ti ti-clock me-1"></i> Time placed:</span> 25/05/2020
-              13:35pm
+              <span class="fw-semibold"><i class="ti ti-clock me-1"></i> Sipariş Zamanı:</span>
+              @Model.SiparisList.First().SiparisTarihi
             </p>
           </div>
           <!-- Confirmation details -->
           <div class="col-12">
             <ul class="list-group list-group-horizontal-md">
               <li class="list-group-item flex-fill p-4 text-heading">
-                <h6><i class="ti ti-map-pin"></i> Shipping</h6>
+                <h6><i class="ti ti-map-pin"></i> Kargo Adres</h6>
                 <address class="mb-0">
-                  John Doe <br>
-                  4135 Parkway Street,<br>
-                  Los Angeles, CA 90017,<br>
-                  USA
+                  @Model.SiparisList.First().Adres.Mahalle <br>
+                  @Model.SiparisList.First().Adres.AdresDetay, @Model.SiparisList.First().Adres.PostaKodu. <br>
+                  @Model.SiparisList.First().Adres.Ulke @Model.SiparisList.First().Adres.Il
+                  @Model.SiparisList.First().Adres.Ilce
                 </address>
-                <p class="mb-0 mt-3">+123456789</p>
               </li>
               <li class="list-group-item flex-fill p-4 text-heading">
-                <h6><i class="ti ti-credit-card"></i> Billing Address</h6>
+                <h6><i class="ti ti-credit-card"></i> Fatura Adresi</h6>
                 <address class="mb-0">
-                  John Doe <br>
-                  4135 Parkway Street,<br>
-                  Los Angeles, CA 90017,<br>
-                  USA
+                  @Model.SiparisList.First().Adres.Mahalle <br>
+                  @Model.SiparisList.First().Adres.AdresDetay, @Model.SiparisList.First().Adres.PostaKodu. <br>
+                  @Model.SiparisList.First().Adres.Ulke @Model.SiparisList.First().Adres.Il
+                  @Model.SiparisList.First().Adres.Ilce
                 </address>
-                <p class="mb-0 mt-3">+123456789</p>
               </li>
               <li class="list-group-item flex-fill p-4 text-heading">
-                <h6 class="d-flex gap-1"><i class="ti ti-ship"></i> Shipping Method</h6>
-                <p class="fw-semibold mb-3">Preferred Method:</p>
-                Standard Delivery<br>
-                (Normally 3-4 business days)
+                <h6 class="d-flex gap-1"><i class="ti ti-ship"></i> Kargo Yöntemi</h6>
+                <p class="fw-semibold mb-3">Gönderim Seçeneği : @Model.TeslimatSecenekleri.First().Ad</p>
+                @Model.TeslimatSecenekleri.First().Aciklama
               </li>
             </ul>
           </div>
@@ -545,82 +581,74 @@
           <!-- Confirmation items -->
           <div class="col-xl-9 mb-3 mb-xl-0">
             <ul class="list-group">
-              <li class="list-group-item p-4">
-                <div class="d-flex gap-3">
-                  <div class="flex-shrink-0">
-                    <img src="../../assets/img/products/1.png" alt="google home" class="w-px-75">
-                  </div>
-                  <div class="flex-grow-1">
-                    <div class="row">
-                      <div class="col-md-8">
-                        <a href="javascript:void(0)" class="text-body">
-                          <p>Google - Google Home - White</p>
-                        </a>
-                        <div class="text-muted mb-1 d-flex flex-wrap">
-                          <span class="me-1">Sold by:</span>
-                          <a href="javascript:void(0)" class="me-3">Apple</a>
-                          <span class="badge bg-label-success">In Stock</span>
-                        </div>
+
+              @{
+                foreach (var siparislerim in Model.SepetList)
+                {
+                  <li class="list-group-item p-4">
+                    <div class="d-flex gap-3">
+                      <div class="flex-shrink-0">
+                        <img src="@siparislerim.Urunler.ImageUrl" class="w-px-75">
                       </div>
-                      <div class="col-md-4">
-                        <div class="text-md-end">
-                          <div class="my-2 my-lg-4">
-                            <span class="text-primary">$299/</span><s class="text-muted">$359</s>
+                      <div class="flex-grow-1">
+                        <div class="row">
+                          <div class="col-md-8">
+                            <a href="javascript:void(0)" class="text-body">
+                              <p>@siparislerim.Urunler.Name</p>
+                            </a>
+                            <div class="text-muted mb-1 d-flex flex-wrap">
+                              <span class="me-1">Satıcı:</span>
+                              <a href="javascript:void(0)" class="me-3">MyShop</a>
+                              <span class="badge bg-label-success">Stokta</span>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="text-md-end">
+                              <div class="my-2 my-lg-4">
+                                <span class="text-primary">@siparislerim.Urunler.Price/</span><s
+                                  class="text-muted">@siparislerim.Urunler.OldPrice</s>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </li>
-              <li class="list-group-item p-4">
-                <div class="d-flex gap-3">
-                  <div class="flex-shrink-0">
-                    <img src="../../assets/img/products/2.png" alt="google home" class="w-px-75">
-                  </div>
-                  <div class="flex-grow-1">
-                    <div class="row">
-                      <div class="col-md-8">
-                        <a href="javascript:void(0)" class="text-body">
-                          <p>Apple iPhone 11 (64GB, Black)</p>
-                        </a>
-                        <div class="text-muted mb-1 d-flex flex-wrap">
-                          <span class="me-1">Sold by:</span>
-                          <a href="javascript:void(0)" class="me-3">Apple</a>
-                          <span class="badge bg-label-success">In Stock</span>
-                        </div>
-                      </div>
-                      <div class="col-md-4">
-                        <div class="text-md-end">
-                          <div class="my-2 my-lg-4">
-                            <span class="text-primary">$299/</span><s class="text-muted">$359</s>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
+                  </li>
+
+
+                }
+
+              }
+
             </ul>
           </div>
           <!-- Confirmation total -->
           <div class="col-xl-3">
             <div class="border rounded p-4 pb-3">
               <!-- Price Details -->
-              <h6>Price Details</h6>
+              <h6>Ödeme Bilgileri</h6>
               <dl class="row mb-0">
-                <dt class="col-6 fw-normal">Order Total</dt>
-                <dd class="col-6 text-end">$1100.00</dd>
+                <dt class="col-6 fw-normal">Toplam Ödeme</dt>
 
-                <dt class="col-sm-6 fw-normal">Delivery Charges</dt>
+                @{
+                  // Sepet toplamını hesapla
+                  decimal sepetToplamSon = Model.SepetList.Sum(x => x.Urunler.Price * x.Quantity);
+
+                }
+
+                <dd class="col-6 text-end">@sepetToplamSon.ToString("N2") TL</dd>
+                <dt class="col-6 fw-normal">Kargo Ücreti</dt>
+                <dd class="col-6 text-end">@kargoUcreti.ToString("N2") TL</dd>
+
+                <dt class="col-sm-6 fw-normal">Kargo Durumu</dt>
                 <dd class="col-sm-6 text-end">
-                  <s>$5.00</s> <span class="badge bg-label-success ms-1">Free</span>
+                  <span class="badge bg-label-success ms-1">@Model.SiparisList.First().Durum</span>
                 </dd>
               </dl>
               <hr class="mx-n4">
               <dl class="row mb-0">
-                <dt class="col-6">Total</dt>
-                <dd class="col-6 fw-semibold text-end mb-0">$1100.00</dd>
+                <dt class="col-6">Toplam</dt>
+                <dd class="col-6 fw-semibold text-end mb-0"> @((sepetToplamSon + kargoUcreti).ToString("N2")) TL</dd>
               </dl>
             </div>
           </div>
