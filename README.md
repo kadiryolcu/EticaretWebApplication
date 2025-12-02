@@ -28,6 +28,10 @@ Proje, MSSQL Server üzerinde çalışmaktadır. Önerilen yapı:
 >### Kullanıcı Üye Ol Sayfası
 <img width="800" alt="image" src="https://github.com/user-attachments/assets/cb501ede-e436-4b41-a49b-a06b47f14402" />
 
+>### Kullanıcı Üyelsk Doğrulama
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/3da012bc-1997-4373-8b72-f0661237e7b0" />
+
+
 > ### Kullanıcı Giriş Sayfası
 
 <img width="800" alt="Kullanıcı Giriş Sayfası" src="https://github.com/user-attachments/assets/3a8ee0ea-0cfe-4577-be35-e753c365db47" />
