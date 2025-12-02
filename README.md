@@ -35,7 +35,7 @@ Proje, MSSQL Server üzerinde çalışmaktadır. Önerilen yapı:
 <img width="800"  alt="image" src="https://github.com/user-attachments/assets/92086f38-5637-43d0-ac78-5e4834d6f5b6" />
 
 > ### E posta Gönderimi
-<img width="1631" height="596" alt="image" src="https://github.com/user-attachments/assets/90a9a266-9559-4ef4-b9fe-cb0a68abc7b8" />
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/90a9a266-9559-4ef4-b9fe-cb0a68abc7b8" />
 
 
 > ### Mağaza sayfası
