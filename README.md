@@ -66,7 +66,9 @@ URL Parametresi
 Parametre	Tip	Açıklama
 id	int	Siparişleri getirilecek kullanıcının ID'si
 
+
 <img width="800" alt="image" src="https://github.com/user-attachments/assets/670baa94-8a0a-41d8-a764-a17de08442b4" />
+
 <img width="800" alt="image" src="https://github.com/user-attachments/assets/c3e0a18a-b0f3-4bd0-a5b8-57402756f820" />
 
 
