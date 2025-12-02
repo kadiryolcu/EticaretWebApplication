@@ -42,4 +42,17 @@ Proje, MSSQL Server üzerinde çalışmaktadır. Önerilen yapı:
 > 
 <img width="800" alt="image" src="https://github.com/user-attachments/assets/6d6ca4cf-1382-43ff-a4f5-388ee894165c" />
 
+> ### Adres sayfası
+> 
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/f420f343-f70e-4240-9961-6d816502f753" />
+
+> ### Ödeme sayfası
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/3905f931-baa0-4671-bd78-819322b6d23a" />
+
+> ### Sipariş Onay sayfası
+<img width="1918" height="1075" alt="image" src="https://github.com/user-attachments/assets/fcddd7f9-5292-4a22-8f42-85987bd59efe" />
+
+
+
+
 
