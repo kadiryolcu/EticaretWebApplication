@@ -26,6 +26,10 @@ Proje, MSSQL Server üzerinde çalışmaktadır. Önerilen yapı:
 
 > **Not:** `appsettings.json` dosyası yüklenmemiştir. E-posta ayarları olduğu için
 >
-> <img width="1911" height="925" alt="image" src="https://github.com/user-attachments/assets/3a8ee0ea-0cfe-4577-be35-e753c365db47" />
+> ### Kullanıcı Giriş Sayfası
+
+<img width="800" alt="Kullanıcı Giriş Sayfası" src="https://github.com/user-attachments/assets/3a8ee0ea-0cfe-4577-be35-e753c365db47" />
+
+
 
 
