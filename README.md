@@ -65,6 +65,10 @@ Bu proje, kullanıcı kayıt/giriş yönetimi, ürün listeleme, sepet işlemler
 
 ## 📷 Arayüz Görselleri
 
+### 📱 Responsive Tasarım
+
+<img width="800" src="https://github.com/user-attachments/assets/014270d5-6a3c-44ff-bb17-5e02d337705f" />
+
 ### 👤 Kullanıcı Üyelik Oluşturma
 
 <img width="800" src="https://github.com/user-attachments/assets/cb501ede-e436-4b41-a49b-a06b47f14402" />
@@ -164,4 +168,5 @@ Aşağıdaki HTML yapı, kullanıcıya gönderilen doğrulama kodu e‑postasın
 ## 📌 Sonuç
 
 Bu proje, modern bir e-ticaret platformu oluşturmak isteyenler için güçlü bir başlangıç noktası sunar. Hem frontend hem backend mimarisi profesyonel şekilde yapılandırılmıştır.
+
 
