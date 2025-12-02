@@ -50,7 +50,10 @@ Proje, MSSQL Server üzerinde çalışmaktadır. Önerilen yapı:
 <img width="800" alt="image" src="https://github.com/user-attachments/assets/3905f931-baa0-4671-bd78-819322b6d23a" />
 
 > ### Sipariş Onay sayfası
-<img width="1918" height="1075" alt="image" src="https://github.com/user-attachments/assets/fcddd7f9-5292-4a22-8f42-85987bd59efe" />
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/fcddd7f9-5292-4a22-8f42-85987bd59efe" />
+
+> ### MSSQL Veritabanı
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/43e186b7-c19e-4145-906e-52a4762e734d" />
 
 
 
