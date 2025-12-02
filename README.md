@@ -34,8 +34,12 @@ Proje, MSSQL Server üzerinde çalışmaktadır. Önerilen yapı:
 
 <img width="800"  alt="image" src="https://github.com/user-attachments/assets/92086f38-5637-43d0-ac78-5e4834d6f5b6" />
 
-> ### Mağaza Ekranı
+> ### Mağaza sayfası
 
 <img width="800" alt="image" src="https://github.com/user-attachments/assets/f2cea707-e88a-4261-b371-1eb97a35937d" />
+
+> ### Sepet sayfası
+> 
+<img width="1920" height="1072" alt="image" src="https://github.com/user-attachments/assets/6d6ca4cf-1382-43ff-a4f5-388ee894165c" />
 
 
